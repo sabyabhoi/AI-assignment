@@ -1,5 +1,4 @@
 import random
-random.seed(125634)
 
 def flip(s, pos):
     return s[:pos] + ('1' if s[pos]=='0' else '0') + s[pos+1:]
@@ -121,7 +120,3 @@ class GeneticAlgorithm:
         self.population = next_generation
         self.mutate()
         self.sort_population()
-
-ga = GeneticAlgorithm(20, 100, 24, 0.1, fitness)
-ind = ga.run()
-print("The fittest individual is :", ind)
