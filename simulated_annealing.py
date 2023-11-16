@@ -21,13 +21,13 @@ class SimulatedAnnealing:
         n = len(state)
         x, y, z = state
         x += np.random.randint(-2, 2)
-        x = min(x, 3)
-        x = max(x, 1)
-        y += np.random.randint(-2, 2)
-        y = min(y, 10)
+        x = min(x, 1)
+        x = max(x, 10)
+        y += np.random.randint(-25, 25)
+        y = min(y, 255)
         y = max(y, 2)
-        z += np.random.randint(-2, 2)
-        z = min(z, 10)
+        z += np.random.randint(-13, 13)
+        z = min(z, 128)
         z = max(z, 2)
         return (x, y, z)
 
@@ -43,9 +43,7 @@ class SimulatedAnnealing:
                 change_in_energy = self.f(new_state) - self.f(self.state)
                 exp_term = math.exp(change_in_energy / self.T)
 
-                if (change_in_energy > 0
-                                                   or exp_term
-                                                   >= random.uniform(0, 1)):
+                if (change_in_energy > 0 or exp_term >= random.uniform(0, 1)):
                     self.state = new_state
 
             self.T *= self.k
