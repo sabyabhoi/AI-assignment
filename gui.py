@@ -33,10 +33,12 @@ def combobox_callback(choice):
     print(f"{choice} selected")
 
 
-values = ["Genetic Algorithm", "Simulated Annealing"]
-combobox = ctk.CTkComboBox(app, width=200, values=values, command=combobox_callback)
+# values = ["Genetic Algorithm", "Simulated Annealing"]
+combobox = ctk.CTkComboBox(
+    app, width=200, values=utils.values, command=combobox_callback
+)
 
-combobox.set(values[1])
+combobox.set(utils.values[1])
 combobox.pack()
 
 status_label = ctk.CTkLabel(app, text="")

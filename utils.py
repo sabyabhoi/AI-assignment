@@ -6,6 +6,7 @@ import numpy as np
 import genetic_algo as GA
 
 from simulated_annealing import SimulatedAnnealing
+from grid_search import GridSearch
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -13,6 +14,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
 
 import matplotlib.pyplot as plt
+
+values = ["Genetic Algorithm", "Simulated Annealing", "Grid Search"]
 
 
 def get_data(stock):
@@ -132,7 +135,7 @@ def plot(dates, observed, predicted, label):
     plt.grid(True)
 
     plt.legend([label + " Predictions", label + " Observations"])
-    plt.savefig("results.png")
+    plt.show()
 
 
 def decode_parameters(s):
@@ -216,7 +219,7 @@ def run_sa(stock: str):
     df = get_data(stock)
     sa_fitness_values = {}
 
-    def sa_fitness(state, return_model=False):
+    def sa_fitness(state):
         if state in sa_fitness_values:
             return sa_fitness_values[state]
         parameters = {
@@ -242,10 +245,7 @@ def run_sa(stock: str):
         ) = train_val_test_split(windowed_dataframe, 0.8, 0.1)
         model = train(parameters, train_X=train_X, train_y=train_y)
         sa_fitness_values[state] = -model.evaluate(val_X, val_y)
-        if return_model:
-            return (sa_fitness_values[state], model)
-        else:
-            return sa_fitness_values[state]
+        return sa_fitness_values[state]
 
     def sa_constraint(_state):
         return True
@@ -294,10 +294,85 @@ def run_sa(stock: str):
     return params
 
 
+def run_grid_search(stock: str):
+    df = get_data(stock)
+
+    search_space = [
+        [i for i in range(1, 7)],  # window size
+        [2**i for i in range(4, 9)],  # hidden layer 1
+        [2**i for i in range(3, 8)],  # hidden layer 2
+    ]
+    gs_fitness_values = {}
+
+    def grid_search_fitness(state: (int, int, int)):
+        if state in gs_fitness_values:
+            return gs_fitness_values[state]
+        parameters = {
+            "window_len": state[0],
+            "hidden_units_1": state[1],
+            "hidden_units_2": state[2],
+        }
+        print(parameters)
+        windowed_dataframe = createWindowedDataframe(
+            df, "2021-08-20", "2023-10-05", w=parameters["window_len"]
+        )
+        (
+            train_dates,
+            train_X,
+            train_y,
+            val_dates,
+            val_X,
+            val_y,
+            test_dates,
+            test_X,
+            test_y,
+        ) = train_val_test_split(windowed_dataframe, 0.8, 0.1)
+        model = train(parameters, train_X=train_X, train_y=train_y)
+
+        gs_fitness_values[state] = -model.evaluate(val_X, val_y)
+        return gs_fitness_values[state]
+
+    gs = GridSearch(
+        init_state=(1, 1, 1), f=grid_search_fitness, search_space=search_space
+    )
+
+    gs_params = gs.run()
+
+    params = {
+        "window_len": gs_params[0],
+        "hidden_units_1": gs_params[1],
+        "hidden_units_2": gs_params[2],
+    }
+
+    windowed_dataframe = createWindowedDataframe(
+        df, "2021-08-20", "2023-10-05", w=params["window_len"]
+    )
+    (
+        train_dates,
+        train_X,
+        train_y,
+        val_dates,
+        val_X,
+        val_y,
+        test_dates,
+        test_X,
+        test_y,
+    ) = train_val_test_split(windowed_dataframe, 0.8, 0.1)
+    best_model = train(params, train_X=train_X, train_y=train_y, verbose=0, epochs=200)
+    best_model.evaluate(val_X, val_y)
+    best_model.evaluate(test_X, test_y)
+    test_predictions = best_model.predict(test_X)
+    plot(dates=test_dates, observed=test_y, predicted=test_predictions, label="Test")
+    return params
+
+
 def run_algo(stock: str, algo: str):
-    if algo == "Genetic Algorithm":
+    if algo == values[0]:
         print("Running GA")
         return run_ga(stock)
-    elif algo == "Simulated Annealing":
+    elif algo == values[1]:
         print("Running SA")
         return run_sa(stock)
+    elif algo == values[2]:
+        print("Running Grid Search")
+        return run_grid_search(stock)

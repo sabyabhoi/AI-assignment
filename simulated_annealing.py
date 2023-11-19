@@ -18,12 +18,11 @@ class SimulatedAnnealing:
         self.state = start_state
         self.T = T
         self.Tmin = Tmin
-        self.k = k
+        self.k = k  # temperature reduction factor
         self.n = n  # no. of iterations
-        self.f = f
+        self.f = f  # fitness function
         self.constraint = constraint
         self.min_state = min_state
-        pass
 
     def neighbour(self, state):
         n = len(state)
