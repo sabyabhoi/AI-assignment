@@ -7,6 +7,7 @@ import genetic_algo as GA
 
 from simulated_annealing import SimulatedAnnealing
 from grid_search import GridSearch
+from pso import ParticleSwarmOptimization
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -15,7 +16,12 @@ from tensorflow.keras import layers
 
 import matplotlib.pyplot as plt
 
-values = ["Genetic Algorithm", "Simulated Annealing", "Grid Search"]
+values = [
+    "Genetic Algorithm",
+    "Simulated Annealing",
+    "Particle Swarm Optimization",
+    "Grid Search",
+]
 
 
 def get_data(stock):
@@ -366,6 +372,74 @@ def run_grid_search(stock: str):
     return params
 
 
+def run_pso(stock: str):
+    pso_fitness_values = {}
+    df = get_data(stock)
+
+    def pso_fitness(x):
+        key = tuple(x.tolist())
+
+        if key in pso_fitness_values:
+            return pso_fitness_values[key]
+
+        parameters = {
+            "window_len": x[0],
+            "hidden_units_1": x[1],
+            "hidden_units_2": x[2],
+        }
+        print(parameters)
+        windowed_dataframe = createWindowedDataframe(
+            df, "2021-08-20", "2023-10-05", w=parameters["window_len"]
+        )
+        (
+            train_dates,
+            train_X,
+            train_y,
+            val_dates,
+            val_X,
+            val_y,
+            test_dates,
+            test_X,
+            test_y,
+        ) = train_val_test_split(windowed_dataframe, 0.8, 0.1)
+        model = train(parameters, train_X=train_X, train_y=train_y)
+        pso_fitness_values[key] = model.evaluate(val_X, val_y)
+        return pso_fitness_values[key]
+
+    pso = ParticleSwarmOptimization(n=5, c1=0.5, c2=0.5, fitness=pso_fitness)
+
+    pso_params = pso.run(epochs=20)
+
+    pso_params = {
+        "window_len": pso_params[0],
+        "hidden_units_1": pso_params[1],
+        "hidden_units_2": pso_params[2],
+    }
+
+    windowed_dataframe = createWindowedDataframe(
+        df, "2021-08-20", "2023-10-05", w=pso_params["window_len"]
+    )
+    (
+        train_dates,
+        train_X,
+        train_y,
+        val_dates,
+        val_X,
+        val_y,
+        test_dates,
+        test_X,
+        test_y,
+    ) = train_val_test_split(windowed_dataframe, 0.8, 0.1)
+    best_model = train(
+        pso_params, train_X=train_X, train_y=train_y, verbose=0, epochs=200
+    )
+    best_model.evaluate(val_X, val_y)
+    best_model.evaluate(test_X, test_y)
+    test_predictions = best_model.predict(test_X)
+    plot(dates=test_dates, observed=test_y, predicted=test_predictions, label="Test")
+    return pso_params
+
+
 def run_algo(stock: str, algo: str):
     if algo == values[0]:
         print("Running GA")
@@ -374,5 +448,8 @@ def run_algo(stock: str, algo: str):
         print("Running SA")
         return run_sa(stock)
     elif algo == values[2]:
+        print("Running Particle Swarm Optimization")
+        return run_pso(stock)
+    elif algo == values[3]:
         print("Running Grid Search")
         return run_grid_search(stock)
