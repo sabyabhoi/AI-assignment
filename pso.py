@@ -1,9 +1,9 @@
 import numpy as np
 
+
 class ParticleSwarmOptimization:
-    
     def __init__(self, n, c1, c2, fitness) -> None:
-        self.n = n   # number of particles
+        self.n = n  # number of particles
         self.c1 = c1
         self.c2 = c2
         self.fitness = fitness
@@ -41,7 +41,12 @@ class ParticleSwarmOptimization:
             for i in range(self.n):
                 r1 = np.random.rand(3)
                 r2 = np.random.rand(3)
-                self.v[i] = self.v[i] + self.c1*np.multiply(r1, (self.lbest[i]-self.x[i])) + self.c2*np.multiply(r2, (self.gbest-self.x[i]))
+                self.v[i] = (
+                    self.v[i]
+                    + self.c1 * np.multiply(r1, (self.lbest[i] - self.x[i]))
+                    + self.c2 * np.multiply(r2, (self.gbest - self.x[i]))
+                )
+                print("Velocity of individual", i + 1, ":", self.v[i])
                 self.x[i] = self.repair(self.x[i] + self.v[i])
         
         return self.gbest
