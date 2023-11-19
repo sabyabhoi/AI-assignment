@@ -21,14 +21,14 @@ class SimulatedAnnealing:
         n = len(state)
         x, y, z = state
         x += np.random.randint(-2, 2)
-        x = min(x, 1)
-        x = max(x, 10)
-        y += np.random.randint(-25, 25)
-        y = min(y, 255)
-        y = max(y, 2)
-        z += np.random.randint(-13, 13)
+        x = min(x, 10)
+        x = max(x, 1)
+        y += np.random.randint(-32, 32)
+        y = min(y, 256)
+        y = max(y, 1)
+        z += np.random.randint(-16, 16)
         z = min(z, 128)
-        z = max(z, 2)
+        z = max(z, 1)
         return (x, y, z)
 
     def run(self):
