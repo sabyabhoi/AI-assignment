@@ -141,7 +141,7 @@ def plot(dates, observed, predicted, label):
     plt.grid(True)
 
     plt.legend([label + " Predictions", label + " Observations"])
-    plt.show()
+    plt.savefig("result.png")
 
 
 def decode_parameters(s):
@@ -265,10 +265,10 @@ def run_sa(stock: str):
         T=10,
         Tmin=0.1,
         k=0.1,
-        n=2,
+        n=6,
         f=sa_fitness,
         constraint=sa_constraint,
-        min_state=(1, 1, 1),
+        max_state=(1, 1, 1),
     )
     sa_params = sa.run()
 
@@ -304,8 +304,8 @@ def run_grid_search(stock: str):
     df = get_data(stock)
 
     search_space = [
-        [i for i in range(1, 7)],  # window size
-        [2**i for i in range(4, 9)],  # hidden layer 1
+        [i for i in range(4, 7)],  # window size
+        [2**i for i in range(5, 9)],  # hidden layer 1
         [2**i for i in range(3, 8)],  # hidden layer 2
     ]
     gs_fitness_values = {}

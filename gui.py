@@ -1,5 +1,3 @@
-import tkinter
-import time
 import customtkinter as ctk
 import utils
 
