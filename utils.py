@@ -141,7 +141,7 @@ def plot(dates, observed, predicted, label):
     plt.grid(True)
 
     plt.legend([label + " Predictions", label + " Observations"])
-    plt.savefig("result.png")
+    plt.show()
 
 
 def decode_parameters(s):
@@ -264,7 +264,7 @@ def run_sa(stock: str):
         ),
         T=10,
         Tmin=0.1,
-        k=0.1,
+        k=0.5,
         n=6,
         f=sa_fitness,
         constraint=sa_constraint,
