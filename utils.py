@@ -268,7 +268,7 @@ def run_sa(stock: str):
         n=2,
         f=sa_fitness,
         constraint=sa_constraint,
-        min_state=(1, 1, 1),
+        max_state=(1, 1, 1),
     )
     sa_params = sa.run()
 

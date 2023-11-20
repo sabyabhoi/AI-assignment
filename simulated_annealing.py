@@ -13,7 +13,7 @@ class SimulatedAnnealing:
         n: int,
         f,
         constraint,
-        min_state: np.ndarray,
+        max_state: np.ndarray,
     ):
         self.state = start_state
         self.T = T
@@ -22,7 +22,7 @@ class SimulatedAnnealing:
         self.n = n  # no. of iterations
         self.f = f  # fitness function
         self.constraint = constraint
-        self.min_state = min_state
+        self.max_state = max_state
 
     def neighbour(self, state):
         n = len(state)
@@ -42,8 +42,8 @@ class SimulatedAnnealing:
         while self.T > self.Tmin:
             for i in range(self.n):
                 print(f"[TEMP = {self.T}] {i + 1}: ")
-                if self.f(self.state) > self.f(self.min_state):
-                    self.min_state = self.state
+                if self.f(self.state) > self.f(self.max_state):
+                    self.max_state = self.state
 
                 new_state = self.neighbour(self.state)
 
@@ -54,4 +54,4 @@ class SimulatedAnnealing:
                     self.state = new_state
 
             self.T *= self.k
-        return self.min_state
+        return self.max_state
